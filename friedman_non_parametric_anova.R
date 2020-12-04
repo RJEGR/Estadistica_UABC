@@ -1,3 +1,5 @@
+library(tidyverse)
+
 # Anova no parametrico > prueba de friendman
 
 a <- c(6,9,6,5,7,5,6,6)
@@ -41,19 +43,31 @@ Friedman <- function(df) {
   # FrCal <- 
   FrCal <- (A*sum(B))-C
   #Frcri
-  Frcri <- qf(0.95, df1 = k-1, df2 = Ntotal-k)
+  Frcri <- qchisq(p=.05, df= k-1, lower.tail=F)
   
   data.frame(FrCal, Frcri)
 }
+
+Friedman(df)
+
 # ejercicio
 
-a <- c(6,9,6,5,7,5,6,6)
-b <- c(5,8,9,8,8,7,7,5)
-c <- c(3,4,3,6,9,6,5,7)
+a <- c(8,7,6,8,5,9,7,8,8,7,7,9)
+b <- c(8,6,8,9,8,7,7,7,6,6,8,9)
+c <- c(7,6,6,7,5,7,7,7,8,6,6,6)
 
-dt <- rbind(
-  data.frame(x = a, g = 'None'),
-  data.frame(x = b, g = 'Clasic'),
-  data.frame(x = c, g = 'Dance')
-)
+df <- data.frame(a,b,c)
+
+df <- df[apply(df, 1, var) > 0,]
+
+Friedman(df)
+
+# se rechaza Ho, por tanto, evaluamos con prueba de signos para contraste multiple:
+
+df %>%
+  mutate(difac = a-c,
+         difab = a-b,
+         difbc = b-c) %>%
+  select(-a,-b,-c) %>%
+  colSums() 
 
