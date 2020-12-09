@@ -579,7 +579,7 @@ n <- length(Dif)
 
 # probamos gausianidad
 
-test_normality(Dif)
+is_parametric(Dif)
 calculate_r_critical_coeff(n)
 
 # continuamos con la desicion de la prueba
@@ -722,31 +722,26 @@ dt <- rbind(
   data.frame(x = c8, g = 'c8')
 )
 
+a <- c(1.96, 2.24, 1.71, 2.41, 1.62, 1.93)
+b <- c(2.11, 2.43, 2.07, 2.71, 2.50, 2.85, 2.88)
+
+dt <- rbind(
+  data.frame(x = a, g = 'A'),
+  data.frame(x = b, g = 'B'))
+
 dt %>%
+  mutate(ranks = rank(x)) %>%
   group_by(g) %>%
-  summarise(n= length((x)),
-            sigma = sum(abs(ztrans(x) > 3)),
-            Zmax = max(ztrans(x)),
-            Zmin = min(ztrans(x)),
-            rpearsonCal = test_normality(x),
-            rpearsoncri = calculate_r_critical_coeff(n)) -> sum
+  summarise(Rmax = sum(ranks))
 
-sum %>% 
-  mutate(Normal_dist = ifelse(rpearsonCal > rpearsoncri, TRUE, FALSE)) %>% view()
+# supuest, Ho sumatoria Ra = sumatoria Rb, Ho -> (TA = TB)
 
+# valores criticos revisados en tabla 7, Critical Values of TL and TU for the Wilcoxon Rank Sum Test: Independent Samples.
+length(a)
+length(b)
 
-# dt %>%
-#   group_by(g) %>%
-#   mutate(z = ztrans(x)) %>% 
-#   mutate(col = ifelse(abs(z) > 3, 'extreme', 'normal')) %>%
-#   ggplot(aes(y = x, x = z, color = col)) +
-#   geom_point() +
-#   geom_path() +
-#   # geom_hline(aes(yintercept = mean), sum) +
-#   facet_grid(g ~.) +
-#   theme_bw() +
-#   labs(color = 'Type', y = "value", x = 'z transform') +
-#   ggthemes::scale_color_calc()
+# 28 56
+
 
 # anova ----
 

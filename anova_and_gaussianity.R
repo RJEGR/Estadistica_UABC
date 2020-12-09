@@ -43,7 +43,7 @@ Ztransform <- function(x) {
 }
 
 # 
-is_parametric <- function(dt) {
+is_parametric <- function(dt, outliers = T, gaussianity = T) {
   
   dt %>%
     group_by(g) %>%
@@ -53,14 +53,23 @@ is_parametric <- function(dt) {
               rCal = Rcalculate_coeff(x),
               rCri = Rcritical_coeff(n),
               gaussian = ifelse(rCal > rCri, TRUE, FALSE),
-              outliers = sum(abs(Ztransform(x) > 3)))
+              outliers = sum(abs(Ztransform(x) > 3))) -> dt
+  
+  if(!outliers) {
+    dt %>% select(-Zmin, -Zmax, -outliers) -> dt
+  }
+  
+  if(!gaussianity) {
+    dt %>% select(-rCri, -rCal, -gaussian) -> dt
+  }
+  
+  return(dt)
 }
 
-# prueba anova 1 via
+# prueba anova 1 via - parametrica
 aov_homemade <- function(df, p = 0.5) {
   
   library(tidyverse)
-  options(digits = 3)
   
   k <- length(unique(dt$g))
   Ntotal <- length(dt$x)
@@ -146,6 +155,9 @@ aov_homemade(dt)
 
 # nota: para el caso de las formulas operacionales (usadas por todos los programas, pero con sus desviaciones), aplicaremos los datos del caldero de la bruja, ie. de los datos pooleados
 
+k <- length(unique(dt$g))
+Ntotal <- length(dt$x)
+
 # 1) Suma de cuadrados SS
 
 CM <- sum(dt$x)^2/length(dt$x) # ver nota
@@ -201,6 +213,7 @@ dt %>%
   aov(x ~ g, data = .) %>%
   summary.aov() # F value es Fcal
 
+qf(1-0.05, df1 = k-1, df2 = Ntotal-k)
 qf(0.95, 2, 25) # los grados de libertad de la columna Df del resumen de la prueba de anova 1-via
 # la varianza entre tratamientos es igual a la varianza a la critica, pro tanto se dice que los tratamientos son iguales
 
