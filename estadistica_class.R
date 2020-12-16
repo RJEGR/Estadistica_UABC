@@ -714,12 +714,12 @@ library(tidyverse)
 dt <- rbind(
   data.frame(x = c1, g = 'c1'),
   data.frame(x = c2, g = 'c2'),
-  data.frame(x = c3, g = 'c3'),
-  data.frame(x = c4, g = 'c4'),
-  data.frame(x = c5, g = 'c5'),
-  data.frame(x = c6, g = 'c6'),
-  data.frame(x = c7, g = 'c7'),
-  data.frame(x = c8, g = 'c8')
+  data.frame(x = c3, g = 'c3')
+  # data.frame(x = c4, g = 'c4'),
+  # data.frame(x = c5, g = 'c5'),
+  # data.frame(x = c6, g = 'c6'),
+  # data.frame(x = c7, g = 'c7'),
+  # data.frame(x = c8, g = 'c8')
 )
 
 a <- c(1.96, 2.24, 1.71, 2.41, 1.62, 1.93)
@@ -737,6 +737,7 @@ dt %>%
 # supuest, Ho sumatoria Ra = sumatoria Rb, Ho -> (TA = TB)
 
 # valores criticos revisados en tabla 7, Critical Values of TL and TU for the Wilcoxon Rank Sum Test: Independent Samples.
+
 length(a)
 length(b)
 
@@ -784,9 +785,33 @@ dt %>%
 
 
 # kruskal-wallis p/ mas de dos muestras independientes
+# 1) hacemos ranks de caldo de la bruja
+
+# 2) Ntotal = e total de observaciones del caldo de la bruja
+# dt %>% filter(Site %in% c('L')) %>% nrow()
+
+Ntotal <- nrow(dt)
+k <- length(unique(dt$g))
 dt %>% 
-  filter(g %in% c("c1", "c2", "c3")) %>%
-  pull(x) %>% rank()
+  # filter(Site %in% c('L')) %>%
+  mutate(ranks = rank(x)) %>%
+  group_by(g) %>%
+  summarise(Tk = sum(ranks),
+            nk = length(g)) %>%
+  mutate(b = (Tk)^2/nk) %>%
+  pull(b) %>% sum() -> b
+  
+a <- 12 / (Ntotal * (Ntotal+1))
+c <- 3*(Ntotal+1)
+
+Hcal <- (a*b)-c
+Hcri <- qchisq(p=.05, df= k-1, lower.tail=F)
+
+data.frame(Hcal, Hcri)
+
+
+
+wilcox_wilxon_independent(dt)
 
 # tarea:
 # Analisis anova kruskal -wallis 
@@ -802,15 +827,7 @@ dt <- rbind(
   data.frame(x = d2, g = 'd2'),
   data.frame(x = d3, g = 'd3'))
 
-dt %>% 
-  mutate(rank = rank(x)) %>%
-  group_by(g) %>%
-  summarise(Ntotal = nrow(dt),
-            nk =length(rank),
-            a = 12 / (Ntotal * Ntotal+1),
-            b = sum(rank)^2/nk,
-            c = 3*(Ntotal+1)) %>%
-  mutate(Hcal = (a*b)-c)
+wilcox_wilxon_independent(dt)
 
 # ejercicio 2
 

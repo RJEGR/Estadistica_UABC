@@ -78,10 +78,33 @@ dataset2 %>%
 
 dataset2 %>%
   mutate(x = DPennA-DPennB, g = 'Diff') %>%
-  summarise(mean(x))
+  summarise(Tcal = (mean(x))/(sd(x)/sqrt(length(x))))
 # Tcal = (mean(x))/(sd(x)/sqrt(length(x)))
 n <- nrow(dataset2)
 
 alfa <- 0.5
 qt(p = 0.975, df= n-1, lower.tail=T)
-  
+
+# revision 1 ----
+
+dataset3 <- read.csv('~/Downloads/air_helium_trial.csv') %>%   as_tibble() 
+
+dataset3 %>% 
+  pivot_longer(-trial, names_to = 'g', values_to = 'x') %>% 
+  is_parametric()
+
+# rev 1 ejercicio 2
+dataset2 %>% 
+  select(day, chlA, chlB, DinoA, DinoB) %>%
+  pivot_longer(-day, names_to = 'g', values_to = 'x') %>% 
+  is_parametric()
+
+# chlA', 'chlB' se resuelven por W-W para dos muestras dependientes, ya que no son gaussianas.
+
+dataset2 %>% 
+  select(day, chlA, chlB, DinoA, DinoB) %>%
+  pivot_longer(-day, names_to = 'g', values_to = 'x') %>%
+  filter(g %in% c('chlA', 'chlB')) %>%
+  mutate(ranks = rank(x)) %>% 
+  group_by(g) %>%
+  summarise(Trank = sum(ranks))

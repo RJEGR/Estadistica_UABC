@@ -63,7 +63,7 @@ df <- df[apply(df, 1, var) > 0,]
 Friedman(df)
 
 # se rechaza Ho, por tanto, evaluamos con prueba de signos para contraste multiple:
-
+# (por continuar)
 df %>%
   mutate(difac = a-c,
          difab = a-b,
