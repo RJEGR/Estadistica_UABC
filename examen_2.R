@@ -28,7 +28,8 @@ wilcox_wilxon_independent <- function(dt, p = 0.05) {
 library(tidyverse)
 
 # 1
-dataset <- read.csv('~/Documents/DOCTORADO/vasijas_romanas.csv') %>%   as_tibble() 
+dataset <- read.csv('~/Documents/DOCTORADO/vasijas_romanas.csv', 
+                    stringsAsFactors = F) %>%   as_tibble() 
 
 dataset %>%
   mutate(id = ifelse(Site %in% "Ashley Rails", "A", 
@@ -40,6 +41,7 @@ table(dataset$id)
 # son independientes
 
 dataset %>%
+  select(-id) %>%
   pivot_longer(-Site, names_to = 'g', values_to = 'x') %>%
   mutate(g = Site) %>%
   is_parametric()
@@ -243,3 +245,7 @@ dt %>%
   geom_boxplot() +
   labs(x = 'Liga', y = '%') +
   theme_bw(base_size = 14, base_family = "GillSans")
+
+dataset2 %>%
+  select(amer.home, natl.home) %>%
+  apply(., 2, sum)
